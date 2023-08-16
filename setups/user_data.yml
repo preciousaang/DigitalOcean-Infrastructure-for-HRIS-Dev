@@ -8,6 +8,7 @@ users:
     shell: /bin/bash
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     ssh-authorized-keys:
+    # I take God Beg you. Never do this in a non dev deployment.
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzqnk5kpBAmKZcQImmGm0EGgBQgCnkouf1D0XiuCtxNcuczmxhEIe3aFqWkiYE/FPqzR5xGiJugBgITRB5MaM1naeGlK2Q80PgmxLn4eFTCVQbY0UsBA76+0iVAijYs+4cFhA8/7KlwyWiVxozmVqBT7ws7X0vMx5mena6E/D4m3D5FK6zUv3qju3JTnGa+fQAZvavQoSIHuUgyyd41WfdENJj0EzLX/YM77o/8Gu6lSpCUDqQUwgmFQohoAeloYlqW87WV1Wtb4QqMbG/VUyluSmHv9fG98LtUjvUoLysONRY4Tu54plk0rdyHA1SzzW1hdJYXanxXd10z1yFPoBYr8IlFhPvXWP8QHAO7xmEwW/KrqOt0dIilkVF1Uk008C/1EAqnLpQp0UZMF8vM/lHKuV7JBCNlzsZNVexVSBTplV4A4xzxC84qpR5Bc06AH3aj0Gsf94G6aPohQd79jPqA1zhoXjLwd/tqMPQz4VnBKwOxqWtSAhXgvMG9/AVGsc= preci@AGZ-PC
 runcmd:
   - apt update -y
