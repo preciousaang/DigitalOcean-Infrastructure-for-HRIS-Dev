@@ -1,0 +1,70 @@
+#cloud-config
+
+package_update: true
+
+users:
+  - name: agz
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzqnk5kpBAmKZcQImmGm0EGgBQgCnkouf1D0XiuCtxNcuczmxhEIe3aFqWkiYE/FPqzR5xGiJugBgITRB5MaM1naeGlK2Q80PgmxLn4eFTCVQbY0UsBA76+0iVAijYs+4cFhA8/7KlwyWiVxozmVqBT7ws7X0vMx5mena6E/D4m3D5FK6zUv3qju3JTnGa+fQAZvavQoSIHuUgyyd41WfdENJj0EzLX/YM77o/8Gu6lSpCUDqQUwgmFQohoAeloYlqW87WV1Wtb4QqMbG/VUyluSmHv9fG98LtUjvUoLysONRY4Tu54plk0rdyHA1SzzW1hdJYXanxXd10z1yFPoBYr8IlFhPvXWP8QHAO7xmEwW/KrqOt0dIilkVF1Uk008C/1EAqnLpQp0UZMF8vM/lHKuV7JBCNlzsZNVexVSBTplV4A4xzxC84qpR5Bc06AH3aj0Gsf94G6aPohQd79jPqA1zhoXjLwd/tqMPQz4VnBKwOxqWtSAhXgvMG9/AVGsc= preci@AGZ-PC
+runcmd:
+  - apt update -y
+  - apt install -y nginx
+  - systemctl enable nginx && systemctl start nginx
+  - mkdir /var/www/workstream-test
+  - apt install mysql-server -y
+  - systemctl enable mysqld && systemctl enable mysqld
+  - mysql -u root -e "create database workstream; use workstream; create user workstream@localhost identified with mysql_native_password by 'albert'; grant all privileges on workstream.* to workstream@localhost; flush privileges;"
+  - echo "127.0.1.1 workstream-test.agz.com.ng" >> /etc/hosts
+  - install lsb-release ca-certificates apt-transport-https software-properties-common -y
+  - add-apt-repository --yes ppa:ondrej/php
+  - apt update -y
+  - apt install php8.1 -y
+  - apt install -y php8.1-fpm php8.1-cli php8.1-common php8.1-mysql php8.1-zip php8.1-gd php8.1-mbstring php8.1-curl php8.1-xml php8.1-bcmath
+  # Configure nginx
+  - touch /etc/nginx/sites-available/workstream
+  - |
+    echo " server {
+            listen 80;
+            listen [::]:80;
+            server_name workstream-test.agz.com.ng;
+            root /var/www/workstream-test/public;
+        
+            add_header X-Frame-Options \"SAMEORIGIN\";
+            add_header X-Content-Type-Options \"nosniff\";
+        
+            index index.php;
+        
+            charset utf-8;
+        
+            location / {
+                try_files \$uri \$uri/ /index.php?\$query_string;
+            }
+        
+            location = /favicon.ico { access_log off; log_not_found off; }
+            location = /robots.txt  { access_log off; log_not_found off; }
+        
+            error_page 404 /index.php;
+        
+            location ~ \.php$ {
+                fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+                fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+                include fastcgi_params;
+            }
+        
+            location ~ /\.(?!well-known).* {
+                deny all;
+            }
+      }
+    " > /etc/nginx/sites-available/workstream
+  - ln -s /etc/nginx/sites-available/workstream /etc/nginx/sites-enabled/ 
+  - systemctl restart nginx
+  - export HOME=/root
+  - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  - php composer-setup.php
+  - php -r "unlink('composer-setup.php');"
+  - mv composer.phar /usr/local/bin/composer
+  - snap install node --channel=16/stable --classic
+  - npm i -g yarn
